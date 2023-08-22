@@ -30,3 +30,9 @@ variable "azs" {
   description = "Availability zones"
   default = ["eu-central-1a", "eu-central-1b"]
 }
+
+variable "db_instance_class" {
+  type = string
+  description = "DB instance class, e.g. db.t3.micro"
+  default = "db.t3.micro"
+}
