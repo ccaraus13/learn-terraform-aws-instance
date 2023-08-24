@@ -9,14 +9,23 @@
 output "petdb_hostname"{
   description = "Pet DB hostname"
   value = aws_db_instance.petdb.address
+  sensitive = true
 }
 
 output "petdb_port"{
   description = "Pet DB port"
   value = aws_db_instance.petdb.port
+  sensitive = true
 }
 
 output "petdb_username"{
   description = "Pet DB username"
   value = aws_db_instance.petdb.username
+  sensitive = true
+}
+
+output "petdb_password"{
+  description = "Pet DB username"
+  value = aws_db_instance.petdb.password
+  sensitive = true
 }

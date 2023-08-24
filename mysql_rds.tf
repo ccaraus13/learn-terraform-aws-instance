@@ -24,7 +24,6 @@ resource "aws_db_instance" "petdb" {
   availability_zone = "eu-central-1a"
 #  multi_az =
   db_subnet_group_name = aws_db_subnet_group.petdb_subnet.name
-  #TODO ??
   vpc_security_group_ids = [aws_security_group.petdb.id]
   deletion_protection = false
   network_type = "IPV4"

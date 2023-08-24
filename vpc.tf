@@ -12,6 +12,9 @@ resource "aws_subnet" "public_subnets" {
   cidr_block = element(var.public_subnets_cidrs, count.index)
   availability_zone = element(var.azs, count.index)
 
+  #assign public IP(at lunch) only for subnet in AZ with index 0(for testing purposes)
+#  map_public_ip_on_launch = count.index == 0
+
   tags = {
     Name = "Public Subnet ${count.index + 1}"
   }
@@ -55,8 +58,11 @@ resource "aws_route_table_association" "public_subnet_asso" {
   route_table_id = aws_route_table.rtb_public.id
 }
 
+#
+# DB security groups & rules
+#
 resource "aws_security_group" "petdb" {
-  name = "petdb_securitygroup"
+  name = "petdb"
   description = "PetClinic DB Instance Security Group"
   vpc_id = aws_vpc.petcln.id
 
@@ -66,12 +72,10 @@ resource "aws_vpc_security_group_ingress_rule" "petdb_rule" {
   security_group_id = aws_security_group.petdb.id
   description = "Pet DB Security Group Rule"
 
-  count = length(var.private_subnets_cidrs)
+  count = length(var.public_subnets_cidrs)
 
-  #TODO use IP range from where the traffic will come to DB, the public ones ?
-  cidr_ipv4   = element(var.private_subnets_cidrs, count.index)
+  cidr_ipv4   = element(var.public_subnets_cidrs, count.index)
   from_port   = 3306
   ip_protocol = "tcp"
   to_port     = 3306
-
 }
