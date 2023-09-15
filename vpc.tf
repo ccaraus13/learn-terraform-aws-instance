@@ -10,7 +10,7 @@ resource "aws_subnet" "public_subnets" {
   vpc_id = aws_vpc.petcln.id
   count = length(var.public_subnets_cidrs)
   cidr_block = element(var.public_subnets_cidrs, count.index)
-  availability_zone = element(var.azs, count.index)
+  availability_zone = element(var.availability_zones, count.index)
 
   #assign public IP(at lunch) only for subnet in AZ with index 0(for testing purposes)
 #  map_public_ip_on_launch = count.index == 0
@@ -24,7 +24,7 @@ resource "aws_subnet" "private_subnets" {
   vpc_id = aws_vpc.petcln.id
   count = length(var.private_subnets_cidrs)
   cidr_block = element(var.private_subnets_cidrs, count.index)
-  availability_zone = element(var.azs, count.index)
+  availability_zone = element(var.availability_zones, count.index)
 
   tags = {
     Name = "Private Subnet ${count.index + 1}"
