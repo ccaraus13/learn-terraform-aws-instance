@@ -15,6 +15,11 @@ variable "instance_name" {
   default     = "Provisioned bt Terraform"
 }
 
+variable "iam_instance_profile_role_name_ssm" {
+  description = "Name of an existing AWS IAM Role that will give `Session Manager` permissions to an EC2 instance"
+  default     = "ecsInstanceRole"
+}
+
 
 variable "public_subnets_cidrs" {
   type = list(string)

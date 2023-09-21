@@ -44,9 +44,9 @@ resource "aws_launch_template" "app_container_demo_template" {
   image_id = data.aws_ssm_parameter.linux2_optimized.value
   instance_type = var.instance_type
 
-#  iam_instance_profile {
-#    arn = aws_iam_instance_profile.ecsInstanceRole_profile.arn
-#  }
+  iam_instance_profile {
+    arn = aws_iam_instance_profile.ecsInstanceRole_profile.arn
+  }
 
   user_data = base64encode( templatefile("bash_scripts/ec2_container_user_data.tftpl", { cluster_name = "herculesdemon" }) )
   key_name = "default-hercules-cluster-key-pair"
@@ -66,13 +66,11 @@ resource "aws_launch_template" "app_container_demo_template" {
   }
 }
 
-#resource "aws_iam_instance_profile" "ecsInstanceRole_profile" {
-#  name_prefix = "ecsInstanceRole-profile"
-#  # name of the already defined role
-##  role = "ecsInstanceRole"
-#  role = "AmazonSSMRoleForInstancesQuickSetup"
-#
-#}
+resource "aws_iam_instance_profile" "ecsInstanceRole_profile" {
+  name_prefix = "ecsInstanceRole-profile"
+  # name of the already defined role
+  role = var.iam_instance_profile_role_name_ssm
+}
 
 resource "aws_instance" "petdemon" {
 

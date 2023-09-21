@@ -30,36 +30,6 @@ resource "aws_security_group" "web_server" {
   vpc_id = aws_vpc.petcln.id
 }
 
-###
-### For SSH
-###
-#resource "aws_vpc_security_group_ingress_rule" "web_server_ssh_in" {
-#  security_group_id = aws_security_group.web_server.id
-#  description = "Container Security Group Rule"
-#
-#  count = length(var.public_subnets_cidrs)
-#
-#  cidr_ipv4   = element(var.public_subnets_cidrs, count.index)
-#  from_port   = 22
-#  ip_protocol = "tcp"
-#  to_port     = 22
-#}
-#
-###
-### For SSH
-###
-#resource "aws_vpc_security_group_egress_rule" "web_server_ssh_out" {
-#  security_group_id = aws_security_group.web_server.id
-#  description = "LB Security Group Rule HTTP ${count.index}"
-#
-#  count = length(var.public_subnets_cidrs)
-#
-#  cidr_ipv4   = element(var.public_subnets_cidrs, count.index)
-#  from_port   = 22
-#  ip_protocol = "tcp"
-#  to_port     = 22
-#}
-
 ##
 ## for ec2 & ssm: VPC Endpoints: `Gateway` type, for S3 connection
 ##
