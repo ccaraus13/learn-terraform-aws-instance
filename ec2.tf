@@ -33,17 +33,20 @@
 #}
 
 ################################
+# Get AMI id for EC2 instance
+data "aws_ssm_parameter" "linux2_optimized" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
+}
 
 resource "aws_launch_template" "app_container_demo_template" {
   name_prefix = "pet-container"
   # "Name": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
-  #TODO use `data "aws_ami"`
-  image_id = "ami-0b5009e7f102539b1"
+  image_id = data.aws_ssm_parameter.linux2_optimized.value
   instance_type = var.instance_type
-#  vpc_security_group_ids = [aws_security_group.web_server.id]
-  iam_instance_profile {
-    arn = aws_iam_instance_profile.ecsInstanceRole_profile.arn
-  }
+
+#  iam_instance_profile {
+#    arn = aws_iam_instance_profile.ecsInstanceRole_profile.arn
+#  }
 
   user_data = base64encode( templatefile("bash_scripts/ec2_container_user_data.tftpl", { cluster_name = "herculesdemon" }) )
   key_name = "default-hercules-cluster-key-pair"
@@ -51,17 +54,25 @@ resource "aws_launch_template" "app_container_demo_template" {
   network_interfaces {
     subnet_id = aws_subnet.public_subnets[0].id
     security_groups = [aws_security_group.web_server.id]
-    associate_public_ip_address = true
+#    associate_public_ip_address = true
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "Pet EC2 Host container"
+    }
   }
 }
 
-resource "aws_iam_instance_profile" "ecsInstanceRole_profile" {
-  name_prefix = "ecsInstanceRole-profile"
-  # name of the already defined role
-  role = "ecsInstanceRole"
+#resource "aws_iam_instance_profile" "ecsInstanceRole_profile" {
+#  name_prefix = "ecsInstanceRole-profile"
+#  # name of the already defined role
+##  role = "ecsInstanceRole"
 #  role = "AmazonSSMRoleForInstancesQuickSetup"
-
-}
+#
+#}
 
 resource "aws_instance" "petdemon" {
 
