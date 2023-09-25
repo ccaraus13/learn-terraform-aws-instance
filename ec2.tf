@@ -52,7 +52,7 @@ resource "aws_launch_template" "app_container_demo_template" {
   key_name = "default-hercules-cluster-key-pair"
 
   network_interfaces {
-    subnet_id = aws_subnet.public_subnets[0].id
+    subnet_id = aws_subnet.private_subnets[0].id
     security_groups = [aws_security_group.web_server.id]
 #    associate_public_ip_address = true
   }

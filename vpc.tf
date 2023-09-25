@@ -37,32 +37,32 @@ resource "aws_subnet" "private_subnets" {
 ##
 ## Enable internet access
 ##
-#resource "aws_internet_gateway" "inet_gw" {
-#  vpc_id = aws_vpc.petcln.id
-#
-#  tags = {
-#    Name = "Pet clinic Internet Gateway"
-#  }
-#}
-#
-#resource "aws_route_table" "rtb_public" {
-#  vpc_id = aws_vpc.petcln.id
-#
-#  route {
-#    cidr_block = "0.0.0.0/0"
-#    gateway_id = aws_internet_gateway.inet_gw.id
-#  }
-#
-#  tags = {
-#    Name = "2nd Route Table"
-#  }
-#}
-#
-#resource "aws_route_table_association" "public_subnet_asso" {
-#  count = length(var.public_subnets_cidrs)
-#  subnet_id = element(aws_subnet.public_subnets[*].id, count.index)
-#  route_table_id = aws_route_table.rtb_public.id
-#}
+resource "aws_internet_gateway" "inet_gw" {
+  vpc_id = aws_vpc.petcln.id
+
+  tags = {
+    Name = "Pet clinic Internet Gateway"
+  }
+}
+
+resource "aws_route_table" "rtb_public" {
+  vpc_id = aws_vpc.petcln.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.inet_gw.id
+  }
+
+  tags = {
+    Name = "Inet and Public Subnet Route Table"
+  }
+}
+
+resource "aws_route_table_association" "public_subnet_asso" {
+  count = length(var.public_subnets_cidrs)
+  subnet_id = element(aws_subnet.public_subnets[*].id, count.index)
+  route_table_id = aws_route_table.rtb_public.id
+}
 
 
 # VPC `Interface` endpoint(uses AWS PrivateLink) - sends traffic to a named service
@@ -72,7 +72,7 @@ resource "aws_vpc_endpoint" "ssm" {
   service_name = "com.amazonaws.${var.region}.ssm"
   vpc_id       = aws_vpc.petcln.id
   vpc_endpoint_type = "Interface"
-  subnet_ids = aws_subnet.public_subnets[*].id
+  subnet_ids = aws_subnet.private_subnets[*].id
   security_group_ids = [aws_security_group.web_server.id]
   # magic here: without it Fleet Manager cannot discover EC2 instance
   private_dns_enabled = true
@@ -91,7 +91,7 @@ resource "aws_vpc_endpoint" "ssm_ec2messages" {
   service_name = "com.amazonaws.${var.region}.ec2messages"
   vpc_id       = aws_vpc.petcln.id
   vpc_endpoint_type = "Interface"
-  subnet_ids = aws_subnet.public_subnets[*].id
+  subnet_ids = aws_subnet.private_subnets[*].id
   security_group_ids = [aws_security_group.web_server.id]
   # magic here: without it Fleet Manager cannot discover EC2 instance
   private_dns_enabled = true
@@ -110,7 +110,7 @@ resource "aws_vpc_endpoint" "ssm_ec2" {
   service_name = "com.amazonaws.${var.region}.ec2"
   vpc_id       = aws_vpc.petcln.id
   vpc_endpoint_type = "Interface"
-  subnet_ids = aws_subnet.public_subnets[*].id
+  subnet_ids = aws_subnet.private_subnets[*].id
   security_group_ids = [aws_security_group.web_server.id]
   # magic here: without it Fleet Manager cannot discover EC2 instance
   private_dns_enabled = true
@@ -129,7 +129,7 @@ resource "aws_vpc_endpoint" "ssm_ssmmessages" {
   service_name = "com.amazonaws.${var.region}.ssmmessages"
   vpc_id       = aws_vpc.petcln.id
   vpc_endpoint_type = "Interface"
-  subnet_ids = aws_subnet.public_subnets[*].id
+  subnet_ids = aws_subnet.private_subnets[*].id
   security_group_ids = [aws_security_group.web_server.id]
   # magic here: without it Fleet Manager cannot discover EC2 instance
   private_dns_enabled = true
@@ -149,7 +149,7 @@ resource "aws_vpc_endpoint" "cloud_watch" {
   service_name = "com.amazonaws.${var.region}.logs"
   vpc_id       = aws_vpc.petcln.id
   vpc_endpoint_type = "Interface"
-  subnet_ids = aws_subnet.public_subnets[*].id
+  subnet_ids = aws_subnet.private_subnets[*].id
   security_group_ids = [aws_security_group.web_server.id]
   # magic here: without it Fleet Manager cannot discover EC2 instance
   private_dns_enabled = true
@@ -158,6 +158,40 @@ resource "aws_vpc_endpoint" "cloud_watch" {
 
   tags = {
     Name = "cloud_watch"
+  }
+}
+
+#for accessing docker images from ECR
+resource "aws_vpc_endpoint" "ecr_api" {
+  service_name = "com.amazonaws.${var.region}.ecr.api"
+  vpc_id       = aws_vpc.petcln.id
+  vpc_endpoint_type = "Interface"
+  subnet_ids = aws_subnet.private_subnets[*].id
+  security_group_ids = [aws_security_group.web_server.id]
+  # magic here: without it Fleet Manager cannot discover EC2 instance
+  private_dns_enabled = true
+  ip_address_type = "ipv4"
+  #  policy = "" # defaults to full access
+
+  tags = {
+    Name = "ecr_api"
+  }
+}
+
+#for accessing docker images from ECR
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  service_name = "com.amazonaws.${var.region}.ecr.dkr"
+  vpc_id       = aws_vpc.petcln.id
+  vpc_endpoint_type = "Interface"
+  subnet_ids = aws_subnet.private_subnets[*].id
+  security_group_ids = [aws_security_group.web_server.id]
+  # magic here: without it Fleet Manager cannot discover EC2 instance
+  private_dns_enabled = true
+  ip_address_type = "ipv4"
+  #  policy = "" # defaults to full access
+
+  tags = {
+    Name = "ecr_dkr"
   }
 }
 
@@ -186,8 +220,8 @@ resource "aws_route_table" "for_s3_rt" {
 #  vpc_endpoint_id = aws_vpc_endpoint.ssm_s3.id
 #}
 
-resource "aws_route_table_association" "public_subnet_asso" {
-  count = length(var.public_subnets_cidrs)
-  subnet_id = element(aws_subnet.public_subnets[*].id, count.index)
+resource "aws_route_table_association" "private_subnet_asso" {
+  count = length(var.private_subnets_cidrs)
+  subnet_id = element(aws_subnet.private_subnets[*].id, count.index)
   route_table_id = aws_route_table.for_s3_rt.id
 }
