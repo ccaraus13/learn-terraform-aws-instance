@@ -48,7 +48,14 @@ resource "aws_launch_template" "app_container_demo_template" {
     arn = aws_iam_instance_profile.ecsInstanceRole_profile.arn
   }
 
-  user_data = base64encode( templatefile("bash_scripts/ec2_container_user_data.tftpl", { cluster_name = "herculesdemon" }) )
+  user_data = base64encode( templatefile("bash_scripts/ec2_container_user_data.tftpl", {
+    cluster_name = "herculesdemon",
+    ecr_region = var.region,
+    docker_image_repo = var.petapp_docker_image_repo,
+    docker_image_tag = var.petapp_docker_image_tag,
+    host_port = var.petapp_ec2_port
+
+  }) )
   key_name = "default-hercules-cluster-key-pair"
 
   network_interfaces {

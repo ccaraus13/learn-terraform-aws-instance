@@ -92,8 +92,8 @@ resource "aws_vpc_security_group_ingress_rule" "load_balancer_ec2_in" {
   description = "Load Balancer & EC2 communication in"
 
   referenced_security_group_id = aws_security_group.inet_load_balancer.id
-  from_port = 9080
-  to_port = 9080
+  from_port = var.petapp_ec2_port
+  to_port = var.petapp_ec2_port
   ip_protocol = "tcp"
 }
 
@@ -105,8 +105,8 @@ resource "aws_vpc_security_group_egress_rule" "load_balancer_ec2_out" {
   description = "Load Balancer & EC2 out"
 
   referenced_security_group_id =  aws_security_group.inet_load_balancer.id
-  from_port = 9080
-  to_port = 9080
+  from_port = var.petapp_ec2_port
+  to_port = var.petapp_ec2_port
   ip_protocol = "tcp"
 }
 
@@ -131,6 +131,19 @@ resource "aws_vpc_security_group_ingress_rule" "load_balancer_inet_in" {
 }
 
 ##
+## for LB: open port opened to internet(input traffic)
+##
+resource "aws_vpc_security_group_ingress_rule" "load_balancer_inet_443_in" {
+  security_group_id = aws_security_group.inet_load_balancer.id
+  description = "Load Balancer listener port(internet facing)"
+
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port = 443
+  to_port = 443
+  ip_protocol = "tcp"
+}
+
+##
 ## for LB: open port for communication from LB to EC2 instance(LB input traffic)
 ##
 resource "aws_vpc_security_group_ingress_rule" "load_balancer_ec2_in2" {
@@ -138,8 +151,8 @@ resource "aws_vpc_security_group_ingress_rule" "load_balancer_ec2_in2" {
   description = "Load Balancer & EC2 communication in (LB input traffic)"
 
   referenced_security_group_id = aws_security_group.web_server.id
-  from_port = 9080
-  to_port = 9080
+  from_port = var.petapp_ec2_port
+  to_port = var.petapp_ec2_port
   ip_protocol = "tcp"
 }
 
@@ -151,7 +164,7 @@ resource "aws_vpc_security_group_egress_rule" "load_balancer_ec2_out2" {
   description = "Load Balancer & EC2 out"
 
   referenced_security_group_id = aws_security_group.web_server.id
-  from_port = 9080
-  to_port = 9080
+  from_port = var.petapp_ec2_port
+  to_port = var.petapp_ec2_port
   ip_protocol = "tcp"
 }

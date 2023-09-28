@@ -1,2 +1,22 @@
 #!/bin/bash
 echo ECS_CLUSTER=${cluster_name} >> /etc/ecs/ecs.config
+
+# install aws-cli
+yum install -y aws-cli
+
+# docker login in ECR repo
+aws ecr get-login-password --region ${ecr_region} | docker login --username AWS --password-stdin ${docker_image_repo}
+
+# pull docker image
+docker pull ${docker_image_repo}:${docker_image_tag}
+
+# start docker container
+docker run -d \
+ -p ${host_port}:9080 \
+ --name=nginxtest \
+ --health-cmd='curl http://localhost:9080' \
+ --health-interval=2s \
+ --health-retries=5 \
+ --health-timeout=5s \
+ --health-start-period=5s \
+ ${docker_image_repo}:${docker_image_tag}

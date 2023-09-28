@@ -4,13 +4,14 @@ resource "aws_alb" "petapp" {
   subnets = aws_subnet.public_subnets[*].id
   security_groups = [aws_security_group.inet_load_balancer.id]
 
-  # TODO fix S3 policy
+  # store logs to S3
   access_logs {
     enabled = true
     bucket = "hercules-demon"
     prefix = "loadbalancer"
   }
 
+  #TODO try private LB
   # if false means `Internet-Facing`: internet gateway it is required
   internal = false
 }
@@ -42,7 +43,8 @@ resource "aws_alb_target_group" "petapp" {
   #  with an elastic network interface, not an Amazon EC2 instance.
   target_type = "ip"
   protocol = "HTTP"
-  port = 9080
+  #9080
+  port = var.petapp_ec2_port
   ip_address_type = "ipv4"
   slow_start = 30
 
@@ -52,43 +54,44 @@ resource "aws_alb_target_group" "petapp" {
     matcher = "200,202"
     path = "/"
     protocol = "HTTP"
-    port = 9080
+    port = var.petapp_ec2_port
     timeout = 5
     unhealthy_threshold = 3
   }
 }
 
-#TODO HTTPS
-resource "aws_alb_listener" "petapp_http" {
+# listens on port 80, HTTP traffic
+resource "aws_alb_listener" "petapp_redirect_http_to_https" {
   load_balancer_arn = aws_alb.petapp.arn
   protocol = "HTTP"
   port = "80"
 
-  # will be invoked inc ase of dropped client requests
+  # will be invoked in case of dropped client requests
   default_action {
     type = "fixed-response"
     order = 1000
     fixed_response {
       content_type = "text/html"
       status_code = "200"
-      message_body = "<b>Hmm, why I'm here?</b>"
+      message_body = "<b>Hmm, why I'm here(HTTP)?</b>"
     }
   }
 }
 
-# forward to to application ec2(target group)
-resource "aws_alb_listener_rule" "forward_rule" {
-  listener_arn = aws_alb_listener.petapp_http.arn
+# redirects HTTP to HTTPS rule
+# TODO move to default_action ?
+resource "aws_alb_listener_rule" "http_2_https_redirect_rule" {
+  listener_arn = aws_alb_listener.petapp_redirect_http_to_https.arn
   priority = 10
 
   action {
-    type = "forward"
-    target_group_arn =  aws_alb_target_group.petapp.arn
-#    forward {
-#      target_group {
-#        arn = aws_alb_target_group.petapp.arn
-#      }
-#    }
+    type = "redirect"
+
+    redirect {
+      port = "443"
+      protocol = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 
   condition {
@@ -98,29 +101,66 @@ resource "aws_alb_listener_rule" "forward_rule" {
   }
 }
 
-##resource "aws_alb_listener" "petapp_https" {
-##  load_balancer_arn = aws_alb.petapp.arn
-##  protocol = "HTTPS"
-##  port = "443"
-##  certificate_arn = "" #TODO
-##  ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-##  default_action {
-##    type = "forward"
-##    target_group_arn = aws_alb_target_group.petapp.arn
-##  }
-##}
-##
-##resource "aws_alb_listener" "petapp_http" {
-##  load_balancer_arn = aws_alb.petapp.arn
-##  protocol = "HTTP"
-##  port = "80"
-##  default_action {
-##    type = "redirect"
-##
-##    redirect {
-##      status_code = "HTTP_301"
-##      port = "443"
-##      protocol = "HTTPS"
-##    }
-##  }
-##}
+# listens on port 443, HTTPS traffic
+resource "aws_alb_listener" "petapp_https" {
+  load_balancer_arn = aws_alb.petapp.arn
+  protocol = "HTTPS"
+  port = "443"
+
+  # used to terminate the connection and decrypt requests from clients before routing them to targets
+  certificate_arn = var.acm_ssl_certificate_arn
+
+  # to negotiate SSL connections between a client and the load balancer
+  # security policy:  a combination of protocols and ciphers
+  # The protocol establishes a secure connection between a client and a server and ensures that all data passed between the client and your load balancer is private.
+  # A cipher is an encryption algorithm that uses encryption keys to create a coded message
+  ssl_policy = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+
+
+  # will be invoked in case of dropped client requests
+  default_action {
+    type = "fixed-response"
+    order = 1000
+    fixed_response {
+      content_type = "text/html"
+      status_code = "200"
+      message_body = "<b>Hmm, why I'm here(HTTPS)?</b>"
+    }
+  }
+}
+
+# forward to to application ec2(target group)
+resource "aws_alb_listener_rule" "forward_rule" {
+  listener_arn = aws_alb_listener.petapp_https.arn
+  priority = 10
+
+  action {
+    type = "forward"
+    target_group_arn =  aws_alb_target_group.petapp.arn
+    #    forward {
+    #      target_group {
+    #        arn = aws_alb_target_group.petapp.arn
+    #      }
+    #    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
+# routes traffic to load_balancer
+resource "aws_route53_record" "kukdemon_geckocard_com" {
+  name    = var.petapp_main_domain
+  type    = "A"
+  zone_id = var.route53_hosted_zone_id
+
+  alias {
+    evaluate_target_health = false
+    name                   = aws_alb.petapp.dns_name
+    zone_id                = aws_alb.petapp.zone_id
+  }
+
+}
