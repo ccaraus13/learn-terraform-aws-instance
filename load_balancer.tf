@@ -11,7 +11,6 @@ resource "aws_alb" "petapp" {
     prefix = "loadbalancer"
   }
 
-  #TODO try private LB
   # if false means `Internet-Facing`: internet gateway it is required
   internal = false
 }
@@ -163,4 +162,17 @@ resource "aws_route53_record" "kukdemon_geckocard_com" {
     zone_id                = aws_alb.petapp.zone_id
   }
 
+}
+
+resource "aws_route53_health_check" "domain_health_check" {
+  fqdn = var.petapp_main_domain
+  type = "HTTPS"
+  port = 443
+  request_interval = 30
+  resource_path = "/"
+  failure_threshold = 3
+
+  tags = {
+    "Name" = "kukdemon.geckocard.com https check"
+  }
 }
