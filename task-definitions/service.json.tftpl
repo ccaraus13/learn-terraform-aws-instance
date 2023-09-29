@@ -1,0 +1,29 @@
+[
+    {
+        "name" : "${container_name}",
+        "image" : "${docker_image_repo}:${docker_image_tag}",
+        "essential" : true,
+        "portMappings" : [{
+          "containerPort" : ${host_port}
+        }],
+        "cpu" : 512,
+        "memory" : 300,
+        "memoryReservation" : 128,
+        "healthCheck" : {
+          "command" : [ "CMD-SHELL", "curl -f http://localhost:9080/ || exit 1" ],
+          "interval" : 10,
+          "timeout" : 5,
+          "retries" : 5,
+          "startPeriod" : 15
+        },
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "${log_group}",
+                "awslogs-region": "${aws_region}",
+
+                "awslogs-stream-prefix": "petapp"
+            }
+        }
+    }
+]

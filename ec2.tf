@@ -38,7 +38,7 @@ data "aws_ssm_parameter" "linux2_optimized" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
-resource "aws_launch_template" "app_container_demo_template" {
+resource "aws_launch_template" "app_container" {
   name_prefix = "pet-container"
   # "Name": "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended"
   image_id = data.aws_ssm_parameter.linux2_optimized.value
@@ -48,13 +48,8 @@ resource "aws_launch_template" "app_container_demo_template" {
     arn = aws_iam_instance_profile.ecsInstanceRole_profile.arn
   }
 
-  user_data = base64encode( templatefile("bash_scripts/ec2_container_user_data.tftpl", {
-    cluster_name = "herculesdemon",
-    ecr_region = var.region,
-    docker_image_repo = var.petapp_docker_image_repo,
-    docker_image_tag = var.petapp_docker_image_tag,
-    host_port = var.petapp_ec2_port
-
+  user_data = base64encode( templatefile("bash_scripts/ec2_container_user_data_4_ecs.tftpl", {
+    cluster_name = "hercules"
   }) )
   key_name = "default-hercules-cluster-key-pair"
 
@@ -79,10 +74,11 @@ resource "aws_iam_instance_profile" "ecsInstanceRole_profile" {
   role = var.iam_instance_profile_role_name_ssm
 }
 
-resource "aws_instance" "petdemon" {
-
-  launch_template {
-    id = aws_launch_template.app_container_demo_template.id
-    version = "$Latest"
-  }
-}
+##TODO add `depends on` VPC endpoints: there are situations when VPC endpoints are not ready and docker fails to login respective can't pull images
+#resource "aws_instance" "petdemon" {
+#
+#  launch_template {
+#    id = aws_launch_template.app_container_demo_template.id
+#    version = "$Latest"
+#  }
+#}

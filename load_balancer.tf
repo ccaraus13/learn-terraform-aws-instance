@@ -14,16 +14,16 @@ resource "aws_alb" "petapp" {
   # if false means `Internet-Facing`: internet gateway it is required
   internal = false
 }
-
-##
-## registering targets
-##
-# Notes:
-# - You can configure Amazon Elastic Container Service (Amazon ECS) as a target of your Application Load Balancer
-resource "aws_lb_target_group_attachment" "register_petapp_http" {
-  target_group_arn = aws_alb_target_group.petapp.arn
-  target_id = aws_instance.petdemon.private_ip
-}
+#
+###
+### registering targets
+###
+## Notes:
+## - You can configure Amazon Elastic Container Service (Amazon ECS) as a target of your Application Load Balancer
+#resource "aws_lb_target_group_attachment" "register_petapp_http" {
+#  target_group_arn = aws_alb_target_group.petapp.arn
+#  target_id = aws_instance.petdemon.private_ip
+#}
 
 ##
 ## Routes request to one or more registered targets

@@ -20,7 +20,6 @@ variable "iam_instance_profile_role_name_ssm" {
   default     = "ecsInstanceRole"
 }
 
-
 variable "public_subnets_cidrs" {
   type = list(string)
   description = "Public Subnet CIDR value"
@@ -67,6 +66,12 @@ variable "petapp_ec2_port" {
   type = string
   description = "Docker container host port(used/defined in EC2 - the host) "
   default = "9080"
+}
+
+variable "petapp_task_container_name" {
+  type = string
+  description = "Docker container name to be used in task container definition "
+  default = "petapp"
 }
 
 

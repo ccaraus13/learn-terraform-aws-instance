@@ -161,7 +161,7 @@ resource "aws_vpc_endpoint" "cloud_watch" {
   }
 }
 
-#for accessing docker images from ECR
+#used by ECR API for cation such as DescribeImages and CreateRepository
 resource "aws_vpc_endpoint" "ecr_api" {
   service_name = "com.amazonaws.${var.region}.ecr.api"
   vpc_id       = aws_vpc.petcln.id
@@ -178,7 +178,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
   }
 }
 
-#for accessing docker images from ECR
+# used by docker for pulling/pushing images
 resource "aws_vpc_endpoint" "ecr_dkr" {
   service_name = "com.amazonaws.${var.region}.ecr.dkr"
   vpc_id       = aws_vpc.petcln.id
@@ -192,6 +192,57 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 
   tags = {
     Name = "ecr_dkr"
+  }
+}
+
+#for ECS
+resource "aws_vpc_endpoint" "ecs_agent" {
+  service_name = "com.amazonaws.${var.region}.ecs-agent"
+  vpc_id       = aws_vpc.petcln.id
+  vpc_endpoint_type = "Interface"
+  subnet_ids = aws_subnet.private_subnets[*].id
+  security_group_ids = [aws_security_group.web_server.id]
+  # magic here: without it Fleet Manager cannot discover EC2 instance
+  private_dns_enabled = true
+  ip_address_type = "ipv4"
+  #  policy = "" # defaults to full access
+
+  tags = {
+    Name = "ecs-agent"
+  }
+}
+
+#for ECS
+resource "aws_vpc_endpoint" "ecs_telemetry" {
+  service_name = "com.amazonaws.${var.region}.ecs-telemetry"
+  vpc_id       = aws_vpc.petcln.id
+  vpc_endpoint_type = "Interface"
+  subnet_ids = aws_subnet.private_subnets[*].id
+  security_group_ids = [aws_security_group.web_server.id]
+  # magic here: without it Fleet Manager cannot discover EC2 instance
+  private_dns_enabled = true
+  ip_address_type = "ipv4"
+  #  policy = "" # defaults to full access
+
+  tags = {
+    Name = "ecs_telemetry"
+  }
+}
+
+#for ECS
+resource "aws_vpc_endpoint" "ecs" {
+  service_name = "com.amazonaws.${var.region}.ecs"
+  vpc_id       = aws_vpc.petcln.id
+  vpc_endpoint_type = "Interface"
+  subnet_ids = aws_subnet.private_subnets[*].id
+  security_group_ids = [aws_security_group.web_server.id]
+  # magic here: without it Fleet Manager cannot discover EC2 instance
+  private_dns_enabled = true
+  ip_address_type = "ipv4"
+  #  policy = "" # defaults to full access
+
+  tags = {
+    Name = "ecs"
   }
 }
 
