@@ -45,6 +45,7 @@ resource "aws_autoscaling_group" "pet_scaler" {
 #  warm_pool {}
   max_size = 3
   min_size = 1
+#  Number of Amazon EC2 instances that should be running in the group
   desired_capacity = 1 # may be 0, since it is managed by capacity provider in this case
   vpc_zone_identifier = aws_subnet.private_subnets[*].id
 

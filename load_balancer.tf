@@ -151,7 +151,7 @@ resource "aws_alb_listener_rule" "forward_rule" {
 }
 
 # routes traffic to load_balancer
-resource "aws_route53_record" "kukdemon_geckocard_com" {
+resource "aws_route53_record" "pet_kuk88_site" {
   name    = var.petapp_main_domain
   type    = "A"
   zone_id = var.route53_hosted_zone_id

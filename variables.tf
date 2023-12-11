@@ -78,17 +78,17 @@ variable "petapp_task_container_name" {
 variable "acm_ssl_certificate_arn" {
   type = string
   description = "AWS ACM SSL certificate for kukdemon.geckocard.com domain"
-  default = "arn:aws:acm:eu-central-1:133566492045:certificate/39d5dbc8-1b8f-4ff0-a196-05abd58e373f"
+  default = "arn:aws:acm:eu-central-1:133566492045:certificate/6fd82dc7-7d76-433d-844d-3a5ded949d06"
 }
 
 variable "route53_hosted_zone_id" {
   type = string
   description = "Route 53 hosted zone ID for kukdemon.geckocard.com domain"
-  default = "Z08651222CW3CCMF1ECNR"
+  default = "Z0343916207JGP93Q581O"
 }
 
 variable "petapp_main_domain" {
   type = string
   description = "kukdemon.geckocard.com domain"
-  default = "kukdemon.geckocard.com"
+  default = "pet.kuk88.site"
 }

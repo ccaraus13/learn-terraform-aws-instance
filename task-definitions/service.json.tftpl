@@ -6,8 +6,8 @@
         "portMappings" : [{
           "containerPort" : ${host_port}
         }],
-        "cpu" : 512,
-        "memory" : 300,
+        "cpu" : 256,
+        "memory" : 128,
         "memoryReservation" : 128,
         "healthCheck" : {
           "command" : [ "CMD-SHELL", "curl -f http://localhost:9080/ || exit 1" ],
