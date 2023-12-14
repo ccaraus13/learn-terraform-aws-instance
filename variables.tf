@@ -90,5 +90,5 @@ variable "route53_hosted_zone_id" {
 variable "petapp_main_domain" {
   type = string
   description = "kukdemon.geckocard.com domain"
-  default = "pet.kuk88.site"
+  default = "kuk88.site"
 }

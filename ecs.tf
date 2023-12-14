@@ -84,6 +84,10 @@ resource "aws_ecs_task_definition" "petapp" {
 }
 
 resource "aws_ecs_service" "petapp" {
+  depends_on = [
+    aws_alb.petapp
+  ]
+
   name = "petapp_service"
   task_definition = aws_ecs_task_definition.petapp.arn #ARN or "family:revision"
   cluster = aws_ecs_cluster.hercules_cluster.arn
