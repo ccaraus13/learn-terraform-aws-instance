@@ -173,6 +173,6 @@ resource "aws_route53_health_check" "domain_health_check" {
   failure_threshold = 3
 
   tags = {
-    "Name" = "kukdemon.geckocard.com https check"
+    "Name" = format("%s https check", var.petapp_main_domain)
   }
 }

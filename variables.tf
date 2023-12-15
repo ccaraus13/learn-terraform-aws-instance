@@ -44,22 +44,16 @@ variable "db_instance_class" {
   default = "db.t3.micro"
 }
 
-#variable "petapp_image" {
-#  type = string
-#  description = "Docker image of the PetClinic application"
-#  default = "133566492045.dkr.ecr.eu-central-1.amazonaws.com/nginx-demon:hello9080-0"
-#}
-
 variable "petapp_docker_image_repo" {
   type = string
   description = "Docker image repository URL in ECR"
-  default = "133566492045.dkr.ecr.eu-central-1.amazonaws.com/nginx-demon"
+  default = "133566492045.dkr.ecr.eu-central-1.amazonaws.com/spring-petclinic"
 }
 
 variable "petapp_docker_image_tag" {
   type = string
   description = "Docker image tag(version) in ECR"
-  default = "hello9080-0"
+  default = "3.1.1-SNAPSHOT"
 }
 
 variable "petapp_ec2_port" {
@@ -71,24 +65,24 @@ variable "petapp_ec2_port" {
 variable "petapp_task_container_name" {
   type = string
   description = "Docker container name to be used in task container definition "
-  default = "petapp"
+  default = "pet-clinic"
 }
 
 
 variable "acm_ssl_certificate_arn" {
   type = string
-  description = "AWS ACM SSL certificate for kukdemon.geckocard.com domain"
+  description = "AWS ACM SSL certificate for application domain"
   default = "arn:aws:acm:eu-central-1:133566492045:certificate/6fd82dc7-7d76-433d-844d-3a5ded949d06"
 }
 
 variable "route53_hosted_zone_id" {
   type = string
-  description = "Route 53 hosted zone ID for kukdemon.geckocard.com domain"
+  description = "Route 53 hosted zone ID for application domain"
   default = "Z0343916207JGP93Q581O"
 }
 
 variable "petapp_main_domain" {
   type = string
-  description = "kukdemon.geckocard.com domain"
+  description = "application domain"
   default = "kuk88.site"
 }

@@ -64,8 +64,15 @@ resource "aws_ecs_task_definition" "petapp" {
     container_name = var.petapp_task_container_name,
     docker_image_repo =  var.petapp_docker_image_repo,
     docker_image_tag = var.petapp_docker_image_tag,
+    #  When networkMode=awsvpc, the host ports and container ports in port mappings must match.
     host_port = var.petapp_ec2_port,
     aws_region = var.region,
+
+    #application profile
+    application_profile = aws_db_instance.petdb.engine,
+    db_url = format("jdbc:%s://%s/%s", aws_db_instance.petdb.engine, aws_db_instance.petdb.endpoint, aws_db_instance.petdb.db_name),
+    db_user = aws_db_instance.petdb.username,
+    db_password = aws_db_instance.petdb.password,
     # may be auto-created by enabling option: `"awslogs-create-group": "true"`,
     # requires `logs:CreateLogStream` and `logs:PutLogEvents` IAM policies defined in ecsINstanceRole(added to EC2) or to `execution_role_arn`
     log_group = "ssm-4-hercules"

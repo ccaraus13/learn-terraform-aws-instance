@@ -4,18 +4,46 @@
         "image" : "${docker_image_repo}:${docker_image_tag}",
         "essential" : true,
         "portMappings" : [{
-          "containerPort" : ${host_port}
+          "containerPort" : ${host_port},
+          "hostPort": ${host_port},
+          "protocol" : "tcp"
         }],
-        "cpu" : 256,
-        "memory" : 128,
+        "cpu" : 512,
+        "memory" : 768,
         "memoryReservation" : 128,
         "healthCheck" : {
-          "command" : [ "CMD-SHELL", "curl -f http://localhost:9080/ || exit 1" ],
+          "command" : [ "CMD-SHELL", "/cnb/process/health-check || exit 1" ],
           "interval" : 10,
           "timeout" : 5,
           "retries" : 5,
           "startPeriod" : 15
         },
+        "environment": [
+            {
+                "name": "THC_PORT",
+                "value": "${host_port}"
+            },
+            {
+                "name": "THC_PATH",
+                "value": "/"
+            },
+            {
+                "name": "MYSQL_URL",
+                "value": "${db_url}"
+            },
+            {
+                "name": "MYSQL_USER",
+                "value": "${db_user}"
+            },
+            {
+                "name": "MYSQL_PASS",
+                "value": "${db_password}"
+            },
+            {
+                "name": "JAVA_OPTS",
+                "value": "-Dspring.profiles.active=${application_profile} -Dserver.port=${host_port} "
+            }
+        ],
         "logConfiguration": {
             "logDriver": "awslogs",
             "options": {

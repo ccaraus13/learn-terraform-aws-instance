@@ -7,18 +7,16 @@ resource "aws_security_group" "petdb" {
   vpc_id = aws_vpc.petcln.id
 
 }
-
+# allows input traffic on port 3306 from resources defined by aws_security_group.web_server.id
 resource "aws_vpc_security_group_ingress_rule" "petdb_rule" {
   security_group_id = aws_security_group.petdb.id
   description = "Pet DB Security Group Rule"
 
-#  count = length(var.public_subnets_cidrs)
-#
-#  cidr_ipv4   = element(var.public_subnets_cidrs, count.index)
   from_port   = 3306
   ip_protocol = "tcp"
   to_port     = 3306
-  referenced_security_group_id = aws_security_group.petdb.id
+
+  referenced_security_group_id = aws_security_group.web_server.id
 }
 
 ##
@@ -29,6 +27,19 @@ resource "aws_security_group" "web_server" {
   name = "web_server"
   description = "Web Servers Security Group"
   vpc_id = aws_vpc.petcln.id
+}
+
+###
+### for DB: open port for communication from EC2 to DB instance(EC2 output traffic)
+###
+resource "aws_vpc_security_group_egress_rule" "ec2_db_out" {
+  security_group_id = aws_security_group.web_server.id
+  description = "DB & EC2 out"
+
+  referenced_security_group_id =  aws_security_group.petdb.id
+  from_port = 3306
+  to_port = 3306
+  ip_protocol = "tcp"
 }
 
 ##
