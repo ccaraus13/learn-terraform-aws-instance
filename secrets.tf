@@ -10,7 +10,7 @@ resource "aws_secretsmanager_secret" "mysql_api_user_secret" {
   depends_on = [
     aws_db_instance.petdb
   ]
-  name = "mysql_api_user_secret-12"
+  name = "mysql_api_user_secret-13"
   description = "Credentials For Mysql DB, to be ued by application(other then `master` credentials defined in RDS)"
   #number of days after secret will deleted when deletion was asked
   recovery_window_in_days = 7

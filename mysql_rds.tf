@@ -16,7 +16,7 @@ resource "aws_db_instance" "petdb" {
   db_name              = "petclinic"
   engine               = "mysql"
   engine_version       = "8.0.35"
-  username             = "root"
+  username             = "admin"
   manage_master_user_password = true
   parameter_group_name = aws_db_parameter_group.petdb.name
   skip_final_snapshot  = true
