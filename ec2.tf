@@ -78,7 +78,7 @@ resource "aws_iam_instance_profile" "ecsInstanceRole_profile" {
 #resource "aws_instance" "petdemon" {
 #
 #  launch_template {
-#    id = aws_launch_template.app_container_demo_template.id
+#    id = aws_launch_template.app_container.id
 #    version = "$Latest"
 #  }
 #}

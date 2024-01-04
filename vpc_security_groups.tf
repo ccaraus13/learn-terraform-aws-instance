@@ -8,7 +8,7 @@ resource "aws_security_group" "petdb" {
 
 }
 # allows input traffic on port 3306 from resources defined by aws_security_group.web_server.id
-resource "aws_vpc_security_group_ingress_rule" "petdb_rule" {
+resource "aws_vpc_security_group_ingress_rule" "petdb_webserver_rule" {
   security_group_id = aws_security_group.petdb.id
   description = "Pet DB Security Group Rule"
 
@@ -17,6 +17,78 @@ resource "aws_vpc_security_group_ingress_rule" "petdb_rule" {
   to_port     = 3306
 
   referenced_security_group_id = aws_security_group.web_server.id
+}
+
+# allows input traffic on port 3306 from resources defined by aws_security_group.web_server.id
+resource "aws_vpc_security_group_ingress_rule" "petdb_lambda_rule" {
+  security_group_id = aws_security_group.petdb.id
+  description = "Pet DB Security Group Rule"
+
+  from_port   = 3306
+  ip_protocol = "tcp"
+  to_port     = 3306
+
+  referenced_security_group_id = aws_security_group.lambda.id
+}
+
+##
+## Lambda security groups & rules
+##
+resource "aws_security_group" "lambda" {
+  name = "lambda"
+  description = "Lambdas Security Group"
+  vpc_id = aws_vpc.petcln.id
+}
+
+###
+### for DB: open port for communication from EC2 to DB instance(EC2 output traffic)
+###
+resource "aws_vpc_security_group_egress_rule" "lambda_db_out" {
+  security_group_id = aws_security_group.lambda.id
+  description = "DB & Lambda out"
+
+  referenced_security_group_id = aws_security_group.petdb.id
+  from_port = 3306
+  to_port = 3306
+  ip_protocol = "tcp"
+}
+
+##
+## for lambda: VPC Endpoints `Interface` type
+##
+resource "aws_vpc_security_group_egress_rule" "lambda_out" {
+  security_group_id = aws_security_group.lambda.id
+  description = "Lambda & Extensions out"
+#  referenced_security_group_id = aws_security_group.lambda.id
+  count = length(var.private_subnets_cidrs)
+
+  cidr_ipv4   = element(var.private_subnets_cidrs, count.index)
+
+
+  from_port = 443
+  to_port = 443
+  ip_protocol = "tcp"
+#  ip_protocol = -1
+
+}
+
+##
+## for lambda: VPC Endpoints `Interface` type
+##
+resource "aws_vpc_security_group_ingress_rule" "lambda_in" {
+  security_group_id = aws_security_group.lambda.id
+  description = "Lambda & Extensions in"
+  #  referenced_security_group_id = aws_security_group.lambda.id
+  count = length(var.private_subnets_cidrs)
+
+  cidr_ipv4   = element(var.private_subnets_cidrs, count.index)
+
+
+  from_port = 443
+  to_port = 443
+  ip_protocol = "tcp"
+  #  ip_protocol = -1
+
 }
 
 ##

@@ -52,3 +52,22 @@
 #  description = "Load Balancer DNS"
 #  value = aws_alb.petapp.dns_name
 #}
+
+#output "db_host" {
+#  value = jsondecode(data.aws_secretsmanager_secret_version.mysql_master_secret.secret_string)["host"]
+#  sensitive = false
+#}
+#
+#output "db_master_username" {
+#  value = jsondecode(data.aws_secretsmanager_secret_version.mysql_master_secret.secret_string)["username"]
+#  sensitive = false
+#}
+
+output "db_api_user_secret_id" {
+  value = aws_secretsmanager_secret.mysql_api_user_secret.id
+  sensitive = false
+}
+
+output "create_db_api_user_lambda_result" {
+  value = data.aws_lambda_invocation.create_db_api_user_lambda.result
+}

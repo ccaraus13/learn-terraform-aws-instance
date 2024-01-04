@@ -44,6 +44,24 @@ variable "db_instance_class" {
   default = "db.t3.micro"
 }
 
+variable "mysql_api_username" {
+  type = string
+  description = "Username associated with `petclinic` DB, to be used by JAVA application(other then `master` user of the DB)"
+  default = "petdbuser"
+}
+
+variable "mysql_backup_s3_bucket" {
+  type = string
+  description = "S3 bucket name with the DB backup made by using Percona"
+  default = "percona-pet-mysql-backup"
+}
+
+variable "mysql_restore_from_s3_role" {
+  type = string
+  description = "Ingestion role that allows RDS to import backup from S3 bucket"
+  default = "arn:aws:iam::133566492045:role/MysqlBackupFromS3"
+}
+
 variable "petapp_docker_image_repo" {
   type = string
   description = "Docker image repository URL in ECR"
@@ -85,4 +103,16 @@ variable "petapp_main_domain" {
   type = string
   description = "application domain"
   default = "kuk88.site"
+}
+
+variable "lambda_create_api_user" {
+  type = string
+  description = "Role for lambda function for creating api DB user ARN"
+  default = "arn:aws:iam::133566492045:role/LambdaCreateApiDBUser"
+}
+
+variable "lambda_create_api_user_ecr_uri" {
+  type = string
+  description = "lambda function docker image ECR URL"
+  default = "133566492045.dkr.ecr.eu-central-1.amazonaws.com/lambda-create-api-user:0.8.6"
 }

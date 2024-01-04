@@ -276,3 +276,24 @@ resource "aws_route_table_association" "private_subnet_asso" {
   subnet_id = element(aws_subnet.private_subnets[*].id, count.index)
   route_table_id = aws_route_table.for_s3_rt.id
 }
+
+## VPC `Interface` endpoint(uses AWS PrivateLink) - sends traffic to a named service
+## The endpoint for the Secrets Manager service.
+## Required by Secrets Manager
+resource "aws_vpc_endpoint" "secrets_manager" {
+  service_name = "com.amazonaws.${var.region}.secretsmanager"
+  vpc_id       = aws_vpc.petcln.id
+  vpc_endpoint_type = "Interface"
+  subnet_ids = aws_subnet.private_subnets[*].id
+#  security_group_ids = [aws_security_group.lambda.id, aws_security_group.web_server.id]
+  security_group_ids = [aws_security_group.lambda.id]
+  # resolves the standard Secrets Manager DNS hostname https://secretsmanager.<region>.amazonaws.com.
+  # to the private IP addresses associated with the VPC endpoint specific DNS hostname
+  private_dns_enabled = true
+  ip_address_type = "ipv4"
+#  policy = "" # defaults to full access
+
+  tags = {
+    Name = "secrets"
+  }
+}
