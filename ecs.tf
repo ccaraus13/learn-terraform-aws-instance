@@ -60,7 +60,7 @@ resource "aws_autoscaling_group" "pet_scaler" {
 resource "aws_ecs_task_definition" "petapp" {
   family = "petapp"
 
-  container_definitions = templatefile("task-definitions/service.json.tftpl", {
+  container_definitions = templatefile("task-definitions/service_withsecret.json.tftpl", {
     container_name = var.petapp_task_container_name,
     docker_image_repo =  var.petapp_docker_image_repo,
     docker_image_tag = var.petapp_docker_image_tag,
@@ -69,10 +69,9 @@ resource "aws_ecs_task_definition" "petapp" {
     aws_region = var.region,
 
     #application profile
-    application_profile = aws_db_instance.petdb.engine,
-    db_url = format("jdbc:%s://%s/%s", aws_db_instance.petdb.engine, aws_db_instance.petdb.endpoint, aws_db_instance.petdb.db_name),
-    db_user = aws_db_instance.petdb.username,
-    db_password = aws_db_instance.petdb.password,
+    application_profile = var.petapp_spring_instance_profile,
+
+    secret_id = local.DB_API_USER_SECRET_ID
     # may be auto-created by enabling option: `"awslogs-create-group": "true"`,
     # requires `logs:CreateLogStream` and `logs:PutLogEvents` IAM policies defined in ecsINstanceRole(added to EC2) or to `execution_role_arn`
     log_group = "ssm-4-hercules"
@@ -80,6 +79,10 @@ resource "aws_ecs_task_definition" "petapp" {
 
   requires_compatibilities = ["EC2"]
   network_mode = "awsvpc"
+  # For ECR access and logs
+  execution_role_arn = var.ecs_task_execution_role
+  # provides credentials to the (spring)application(credentials for accessing secrets from Secret Manager)
+  task_role_arn = var.task_role_arn_pet_clinic_app
 
   # optional for EC2 instance, if cluster doesn't have containers with specified limits, task will fail
   #  cpu = 1024 #TODO 1 vCPU?
@@ -101,6 +104,10 @@ resource "aws_ecs_service" "petapp" {
   scheduling_strategy = "REPLICA"
   desired_count = 1
   enable_ecs_managed_tags = true
+
+  # allows accessing docker running containers through `aws-cli` from local machine(some additional configuration is required)
+  # See AWS ECS Exec
+  #  enable_execute_command = true
 
   # if capacity_provider_strategy and launch_type are not defined, the default_capacity_provider_strategy is used
   #  capacity_provider_strategy {

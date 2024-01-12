@@ -285,8 +285,7 @@ resource "aws_vpc_endpoint" "secrets_manager" {
   vpc_id       = aws_vpc.petcln.id
   vpc_endpoint_type = "Interface"
   subnet_ids = aws_subnet.private_subnets[*].id
-#  security_group_ids = [aws_security_group.lambda.id, aws_security_group.web_server.id]
-  security_group_ids = [aws_security_group.lambda.id]
+  security_group_ids = [aws_security_group.lambda.id, aws_security_group.web_server.id]
   # resolves the standard Secrets Manager DNS hostname https://secretsmanager.<region>.amazonaws.com.
   # to the private IP addresses associated with the VPC endpoint specific DNS hostname
   private_dns_enabled = true

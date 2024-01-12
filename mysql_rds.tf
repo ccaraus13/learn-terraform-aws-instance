@@ -79,3 +79,8 @@ data "aws_lambda_invocation" "create_db_api_user_lambda" {
     }
     JSON
 }
+
+locals {
+  lambda_invocation_result = jsondecode(data.aws_lambda_invocation.create_db_api_user_lambda.result)
+  DB_API_USER_SECRET_ID = local.lambda_invocation_result.status == "OK" ? local.lambda_invocation_result.secret_id : "error"
+}
