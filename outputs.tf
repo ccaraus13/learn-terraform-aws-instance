@@ -71,3 +71,7 @@ output "db_api_user_secret_id" {
 output "create_db_api_user_lambda_result" {
   value = data.aws_lambda_invocation.create_db_api_user_lambda.result
 }
+
+output "create_db_api_user_lambda_result_secret_id" {
+  value = local.DB_API_USER_SECRET_ID
+}

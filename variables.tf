@@ -71,7 +71,14 @@ variable "petapp_docker_image_repo" {
 variable "petapp_docker_image_tag" {
   type = string
   description = "Docker image tag(version) in ECR"
-  default = "3.1.1-SNAPSHOT"
+  default = "3.1.7-SNAPSHOT"
+}
+
+variable "petapp_spring_instance_profile" {
+  type = string
+  description = "Spring application instance profile"
+  default = "secretsmanager-mysql"
+#  default = "mysql"
 }
 
 variable "petapp_ec2_port" {
@@ -114,5 +121,17 @@ variable "lambda_create_api_user" {
 variable "lambda_create_api_user_ecr_uri" {
   type = string
   description = "lambda function docker image ECR URL"
-  default = "133566492045.dkr.ecr.eu-central-1.amazonaws.com/lambda-create-api-user:0.8.6"
+  default = "133566492045.dkr.ecr.eu-central-1.amazonaws.com/lambda-create-api-user:0.9.3"
+}
+
+variable "task_role_arn_pet_clinic_app" {
+  type = string
+  description = "IAM Role that provides credentials to the (spring)application(credentials for accessing secrets from Secret Manager)"
+  default = "arn:aws:iam::133566492045:role/PetClinicTaskRole"
+}
+
+variable "ecs_task_execution_role" {
+  type = string
+  description = "IAM Role designed for ECS task execution: access to ECR and logs"
+  default = "arn:aws:iam::133566492045:role/PetClinicECSTaskExecutionRole"
 }
